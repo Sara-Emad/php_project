@@ -1,7 +1,7 @@
 document.getElementById("addProduct").addEventListener("submit", function (e) {
     let isValid = true;
 
-    let name = document.getElementById("name").value.trim();
+    let name = document.getElementById("productName").value.trim();
     let price = document.getElementById("price").value.trim();
     let category = document.getElementById("category").value;
     let image = document.getElementById("image").files[0];

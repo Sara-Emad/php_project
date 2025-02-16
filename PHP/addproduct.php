@@ -71,12 +71,12 @@
           >
             <h2 class="text-center mb-4 text-warning">Add Product</h2>
             <div class="mb-3">
-              <label for="name" class="form-label">Name:</label>
+              <label for="productName" class="form-label">Product Name:</label>
               <input 
               type="text" 
               class="form-control" 
-              id="name" 
-              name="name" 
+              id="productName" 
+              name="productName" 
               required
               />
             </div>
