@@ -22,7 +22,93 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cafe Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    <style>
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    
+    .product-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .product-info {
+      padding: 1rem;
+    }
+    
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .product-price {
+      color: #2563eb;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    
+    .add-to-cart {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    
+    .add-to-cart:hover {
+      background-color: #1d4ed8;
+    }
+    
+    .search-container {
+      margin: 1rem auto;
+      max-width: 600px;
+      padding: 0 1rem;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    
+    .search-input:focus {
+      border-color: #2563eb;
+      outline: none;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+      grid-column: 1 / -1;
+    }
+  </style>
+  </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -89,12 +175,12 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Room</label>
+                                    <label class="form-label">Table</label>
                                     <select class="form-select" name="room">
-                                        <option value="">Select Room</option>
-                                        <option value="Room 1">Room 1</option>
-                                        <option value="Room 2">Room 2</option>
-                                        <option value="Room 3">Room 3</option>
+                                        <option value="">Select Table</option>
+                                        <option value="Room 1">table 1</option>
+                                        <option value="Room 2">table 2</option>
+                                        <option value="Room 3">table 3</option>
                                     </select>
                                 </div>
                             </div>
@@ -130,25 +216,21 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
     <br>
     <br>
-    <div class="row mb-4">
-            <div class="col-md-6 offset-md-3">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" 
-                           placeholder="Search users by name, email or room...">
-                    <button class="btn btn-primary" onclick="searchUsers()">Search</button>
-                </div>
-            </div>
-        </div>
 
-        
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div id="searchResults">
-                    <!-- Results will be displayed here -->
-                </div>
-            </div>
-        </div>
-    </div>
+
+<div class="search-container">
+    <input 
+      type="text" 
+      id="productSearch" 
+      class="search-input" 
+      placeholder="Search for products..."
+    >
+  </div>
+  
+  <div id="productGrid" class="product-grid">
+    <!-- Products will be displayed here -->
+  </div>
+</div>
 <div id="orderItemsInputs" style="display: none;">
     <!-- Hidden inputs will be added here -->
 </div>
@@ -286,46 +368,94 @@ document.getElementById('orderForm').addEventListener('keypress', function(e) {
     }
 });
 
-function searchUsers() {
-        const searchTerm = document.getElementById('searchInput').value;
-        
-        fetch(`search_users.php?keyword=${encodeURIComponent(searchTerm)}`)
-            .then(response => response.json())
-            .then(data => {
-                const resultsDiv = document.getElementById('searchResults');
-                
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = '<div class="alert alert-info">No users found</div>';
-                    return;
-                }
-                
-                let html = '<div class="list-group">';
-                data.forEach(user => {
-                    html += `
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">${user.name}</h6>
-                                    <small>${user.email}</small>
-                                </div>
-                                <div>
-                                    <span class="badge bg-primary">Room: ${user.room || 'N/A'}</span>
-                                    <span class="badge bg-secondary">Ext: ${user.ext || 'N/A'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                
-                resultsDiv.innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('searchResults').innerHTML = 
-                    '<div class="alert alert-danger">Error searching users</div>';
-            });
+// Store all products globally so we can filter them
+// Get all products from the select element
+function getAllProducts()
+ {
+      const productSelect = document.querySelector('select[name="product_id"]');
+      const products = Array.from(productSelect.options)
+        .filter(option => option.value) // Skip the "Select Product" option
+        .map(option => {
+          const [name, price] = option.text.split(' - EGP ');
+          return {
+            id: option.value,
+            name: name.trim(),
+            price: parseFloat(price),
+            image: `/api/placeholder/400/300`
+          };
+        });
+      return products;
+  }
+
+    // Create product card element
+    function createProductCard(product) {
+      return `
+        <div class="product-card">
+          <img src="${product.image}" alt="${product.name}" class="product-image">
+          <div class="product-info">
+            <div class="product-name">${product.name}</div>
+            <div class="product-price">EGP ${product.price.toFixed(2)}</div>
+            <button 
+              class="add-to-cart"
+              onclick="quickAddToOrder(${product.id}, '${product.name}', ${product.price})"
+            >
+              Add to Order
+            </button>
+          </div>
+        </div>
+      `;
     }
+
+    // Filter and display products
+    function filterProducts(searchTerm) {
+      const products = getAllProducts();
+      const filteredProducts = products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      const productGrid = document.getElementById('productGrid');
+      
+      if (filteredProducts.length === 0) {
+        productGrid.innerHTML = '<div class="no-results">No products found</div>';
+        return;
+      }
+      
+      productGrid.innerHTML = filteredProducts.map(product => 
+        createProductCard(product)
+      ).join('');
+    }
+
+    // Quick add to order function
+    function quickAddToOrder(productId, productName, productPrice) {
+      const productSelect = document.querySelector('select[name="product_id"]');
+      const quantityInput = document.querySelector('input[name="quantity"]');
+      
+      if (productSelect && quantityInput) {
+        productSelect.value = productId;
+        quantityInput.value = "1";
+        // Trigger the existing addToOrder function
+        addToOrder();
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      // Display all products initially
+      filterProducts('');
+      
+      // Add search input event listener
+      const searchInput = document.getElementById('productSearch');
+      let debounceTimeout;
+      
+      searchInput.addEventListener('input', function(e) {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          filterProducts(e.target.value);
+        }, 300); // Debounce for better performance
+      });
+    });
+
+
 </script>
 </body>
 </html>
