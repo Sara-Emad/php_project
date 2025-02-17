@@ -1,0 +1,176 @@
+[17-Feb-2025 08:13:36 Europe/Berlin] POST data received: Array
+(
+    [products] => Array
+        (
+            [0] => Array
+                (
+                    [product_id] => 2
+                    [quantity] => 2
+                )
+
+            [1] => Array
+                (
+                    [product_id] => 5
+                    [quantity] => 18
+                )
+
+        )
+
+    [notes] => mmmmmmmmm
+    [room] => Room 1
+)
+
+[17-Feb-2025 08:13:36 Europe/Berlin] Products data: Array
+(
+    [0] => Array
+        (
+            [product_id] => 2
+            [quantity] => 2
+        )
+
+    [1] => Array
+        (
+            [product_id] => 5
+            [quantity] => 18
+        )
+
+)
+
+[17-Feb-2025 08:13:36 Europe/Berlin] Query: INSERT INTO orders
+                  (user_id, status, date, notes, room)
+                  VALUES (:user_id, :status, :date, :notes, :room)
+[17-Feb-2025 08:13:36 Europe/Berlin] Parameters: Array
+(
+    [user_id] => 1
+    [status] => Pending
+    [date] => 2025-02-17 08:13:36
+    [notes] => mmmmmmmmm
+    [room] => Room 1
+)
+
+[17-Feb-2025 08:16:00 Europe/Berlin] POST data received: Array
+(
+    [products] => Array
+        (
+            [0] => Array
+                (
+                    [product_id] => 1
+                    [quantity] => 11
+                )
+
+        )
+
+    [notes] => harry up
+    [room] => Room 2
+)
+
+[17-Feb-2025 08:16:00 Europe/Berlin] Products data: Array
+(
+    [0] => Array
+        (
+            [product_id] => 1
+            [quantity] => 11
+        )
+
+)
+
+[17-Feb-2025 08:16:00 Europe/Berlin] Query: INSERT INTO orders
+                  (user_id, status, date, notes, room)
+                  VALUES (:user_id, :status, :date, :notes, :room)
+[17-Feb-2025 08:16:00 Europe/Berlin] Parameters: Array
+(
+    [user_id] => 1
+    [status] => Pending
+    [date] => 2025-02-17 08:16:00
+    [notes] => harry up
+    [room] => Room 2
+)
+
+[17-Feb-2025 08:22:20 Europe/Berlin] POST data received: Array
+(
+    [products] => Array
+        (
+            [0] => Array
+                (
+                    [product_id] => 2
+                    [quantity] => 10
+                )
+
+        )
+
+    [notes] => more suger
+    [room] => Room 2
+)
+
+[17-Feb-2025 08:22:20 Europe/Berlin] Products data: Array
+(
+    [0] => Array
+        (
+            [product_id] => 2
+            [quantity] => 10
+        )
+
+)
+
+[17-Feb-2025 08:22:20 Europe/Berlin] Query: INSERT INTO orders
+                  (user_id, status, date, notes, room)
+                  VALUES (:user_id, :status, :date, :notes, :room)
+[17-Feb-2025 08:22:20 Europe/Berlin] Parameters: Array
+(
+    [user_id] => 1
+    [status] => Pending
+    [date] => 2025-02-17 08:22:20
+    [notes] => more suger
+    [room] => Room 2
+)
+
+[17-Feb-2025 08:24:14 Europe/Berlin] POST data received: Array
+(
+    [products] => Array
+        (
+            [0] => Array
+                (
+                    [product_id] => 8
+                    [quantity] => 15
+                )
+
+            [1] => Array
+                (
+                    [product_id] => 11
+                    [quantity] => 1
+                )
+
+        )
+
+    [notes] => all
+    [room] => Room 1
+)
+
+[17-Feb-2025 08:24:14 Europe/Berlin] Products data: Array
+(
+    [0] => Array
+        (
+            [product_id] => 8
+            [quantity] => 15
+        )
+
+    [1] => Array
+        (
+            [product_id] => 11
+            [quantity] => 1
+        )
+
+)
+
+[17-Feb-2025 08:24:14 Europe/Berlin] Query: INSERT INTO orders
+                  (user_id, status, date, notes, room)
+                  VALUES (:user_id, :status, :date, :notes, :room)
+[17-Feb-2025 08:24:14 Europe/Berlin] Parameters: Array
+(
+    [user_id] => 1
+    [status] => Pending
+    [date] => 2025-02-17 08:24:14
+    [notes] => all
+    [room] => Room 1
+)
+

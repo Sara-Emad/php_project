@@ -1,11 +1,331 @@
+
+<?php
+require_once '../php/database/config.php';
+require_once '../php/products.php';
+
+// Initialize database connection
+$database = new Database();
+$db = $database->getConnection();
+
+// Initialize Product object
+$product = new Product($db);
+
+// Get all products
+$stmt = $product->read();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Cafe System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.php">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="orders.php">Orders</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>New Order</h5>
+                </div>
+                <div class="card-body">
+                    <form id="orderForm" method="POST" action="process_order.php">
+                        <div class="row">
+                            <!-- Left side - Order Input -->
+                            <div class="col-md-8">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Product</label>
+                                        <select class="form-select" name="product_id" required>
+                                            <option value="">Select Product</option>
+                                            <?php foreach($products as $product): ?>
+                                                <option value="<?php echo $product['product_id']; ?>">
+                                                    <?php echo $product['product_name']; ?> - 
+                                                    EGP <?php echo $product['product_price']; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" name="quantity" min="1" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-primary d-block w-100" onclick="addToOrder()">
+                                            Add to Order
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Notes</label>
+                                    <textarea class="form-control" name="notes" rows="2"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Room</label>
+                                    <select class="form-select" name="room">
+                                        <option value="">Select Room</option>
+                                        <option value="Room 1">Room 1</option>
+                                        <option value="Room 2">Room 2</option>
+                                        <option value="Room 3">Room 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Right side - Order Summary -->
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Order Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="orderItems" class="mb-3">
+                                            <!-- Order items will be displayed here -->
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <h6>Total:</h6>
+                                            <h6 id="orderTotal">EGP 0.00</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-success w-100">Confirm Order</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <br>
+    <br>
+    <div class="row mb-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" 
+                           placeholder="Search users by name, email or room...">
+                    <button class="btn btn-primary" onclick="searchUsers()">Search</button>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div id="searchResults">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+<div id="orderItemsInputs" style="display: none;">
+    <!-- Hidden inputs will be added here -->
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+let orderItems = [];
+let total = 0;
+
+function addToOrder() {
+    const productSelect = document.querySelector('select[name="product_id"]');
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    
+    if (!productSelect.value) {
+        alert('Please select a product');
+        return;
+    }
+
+    const productOption = productSelect.selectedOptions[0];
+    const productId = productSelect.value;
+    const productName = productOption.text.split(' - ')[0];
+    const productPrice = parseFloat(productOption.text.split('EGP ')[1]);
+    const quantity = parseInt(quantityInput.value);
+    
+    if (quantity <= 0 || isNaN(quantity)) {
+        alert('Please enter a valid quantity');
+        return;
+    }
+
+    // Add item to order
+    orderItems.push({
+        product_id: productId,
+        name: productName,
+        quantity: quantity,
+        price: productPrice,
+        total: productPrice * quantity
+    });
+    
+    updateOrderSummary();
+    
+    // Keep the selected product and only reset quantity
+    quantityInput.value = "1";
+}
+
+function updateOrderSummary() {
+    const orderItemsDiv = document.getElementById('orderItems');
+    orderItemsDiv.innerHTML = '';
+    total = 0;
+    
+    orderItems.forEach((item, index) => {
+        orderItemsDiv.innerHTML += `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <span class="fw-bold">${item.name}</span>
+                    <br>
+                    <small>Qty: ${item.quantity} × EGP ${item.price}</small>
+                </div>
+                <div class="text-end">
+                    <div>EGP ${item.total.toFixed(2)}</div>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${index})">×</button>
+                </div>
+            </div>
+        `;
+        total += item.total;
+    });
+    
+    document.getElementById('orderTotal').textContent = `EGP ${total.toFixed(2)}`;
+}
+
+function removeItem(index) {
+    orderItems.splice(index, 1);
+    updateOrderSummary();
+}
+
+document.getElementById('orderForm').onsubmit = function(e) {
+    e.preventDefault();
+    
+    if (orderItems.length === 0) {
+        alert('Please add at least one product to the order');
+        return false;
+    }
+
+    const formData = new FormData();
+    
+    // Add each product to formData
+    orderItems.forEach((item, index) => {
+        formData.append(`products[${index}][product_id]`, item.product_id);
+        formData.append(`products[${index}][quantity]`, item.quantity);
+    });
+
+    // Add other form fields
+    formData.append('notes', document.querySelector('textarea[name="notes"]').value);
+    formData.append('room', document.querySelector('select[name="room"]').value);
+
+    // Show loading state
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = 'Processing...';
+
+    fetch('process_order.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Order created successfully!');
+            // Clear form and order items
+            orderItems = [];
+            updateOrderSummary();
+            this.reset();
+            location.reload(); // Optional: reload the page after successful order
+        } else {
+            throw new Error(data.message || 'Failed to create order');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'An error occurred while processing the order');
+    })
+    .finally(() => {
+        // Reset button state
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    });
+
+    return false;
+};
+
+// Prevent form submission on enter key
+document.getElementById('orderForm').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+    }
+});
+
+function searchUsers() {
+        const searchTerm = document.getElementById('searchInput').value;
+        
+        fetch(`search_users.php?keyword=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(data => {
+                const resultsDiv = document.getElementById('searchResults');
+                
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="alert alert-info">No users found</div>';
+                    return;
+                }
+                
+                let html = '<div class="list-group">';
+                data.forEach(user => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">${user.name}</h6>
+                                    <small>${user.email}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary">Room: ${user.room || 'N/A'}</span>
+                                    <span class="badge bg-secondary">Ext: ${user.ext || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                resultsDiv.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('searchResults').innerHTML = 
+                    '<div class="alert alert-danger">Error searching users</div>';
+            });
+    }
+</script>
 </body>
 </html>
