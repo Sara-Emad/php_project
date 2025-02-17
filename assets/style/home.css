@@ -1,0 +1,14 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+  body {
+    background-image: url("../images/page-title-bg.webp");
+    background-size: cover;
+    background-repeat: no-repeat;
+    }
+  .btn-danger{
+    margin-left: 10px;
+    
+  }
