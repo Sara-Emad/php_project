@@ -3,6 +3,11 @@
 class Database {
     private $conn;
 
+    public function getConnection() {
+        return $this->conn;
+    }
+    
+
     public function connect() {
         try {
             $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
