@@ -122,7 +122,10 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <a class="nav-link" href="index.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="products.php">Products</a>
+                        <a class="nav-link" href="adduser.php">add user</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="product_mangement.php">Products</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="orders.php">Orders</a>
@@ -148,14 +151,16 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <div class="col-md-6">
                                         <label class="form-label">Product</label>
                                         <select class="form-select" name="product_id" required>
-                                            <option value="">Select Product</option>
-                                            <?php foreach($products as $product): ?>
-                                                <option value="<?php echo $product['product_id']; ?>">
-                                                    <?php echo $product['product_name']; ?> - 
-                                                    EGP <?php echo $product['product_price']; ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+    <option value="">Select Product</option>
+    <?php foreach($products as $product): ?>
+        <option value="<?php echo $product['product_id']; ?>"
+                data-category="<?php echo htmlspecialchars($product['category_name']); ?>"
+                data-image="<?php echo htmlspecialchars($product['image']); ?>">
+            <?php echo $product['product_name']; ?> - 
+            EGP <?php echo $product['product_price']; ?>
+        </option>
+    <?php endforeach; ?>
+</select>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Quantity</label>
@@ -368,92 +373,161 @@ document.getElementById('orderForm').addEventListener('keypress', function(e) {
     }
 });
 
-// Store all products globally so we can filter them
-// Get all products from the select element
-function getAllProducts()
- {
-      const productSelect = document.querySelector('select[name="product_id"]');
-      const products = Array.from(productSelect.options)
+// =====================================================
+// Get all products from PHP and store them for search
+let allProducts = [];
+
+// Initialize search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Get products from the select element and store them
+    const productSelect = document.querySelector('select[name="product_id"]');
+    allProducts = Array.from(productSelect.options)
         .filter(option => option.value) // Skip the "Select Product" option
         .map(option => {
-          const [name, price] = option.text.split(' - EGP ');
-          return {
-            id: option.value,
-            name: name.trim(),
-            price: parseFloat(price),
-            image: `/api/placeholder/400/300`
-          };
+            const [name, priceText] = option.text.split(' - EGP ');
+            return {
+                id: option.value,
+                name: name.trim(),
+                price: parseFloat(priceText),
+                category: option.dataset.category || '',
+                image: option.dataset.image || ''
+            };
         });
-      return products;
-  }
 
-    // Create product card element
-    function createProductCard(product) {
-      return `
-        <div class="product-card">
-          <img src="${product.image}" alt="${product.name}" class="product-image">
-          <div class="product-info">
-            <div class="product-name">${product.name}</div>
-            <div class="product-price">EGP ${product.price.toFixed(2)}</div>
-            <button 
-              class="add-to-cart"
-              onclick="quickAddToOrder(${product.id}, '${product.name}', ${product.price})"
-            >
-              Add to Order
-            </button>
-          </div>
-        </div>
-      `;
-    }
+    // Set up search input handler with debouncing
+    const searchInput = document.getElementById('productSearch');
+    let debounceTimeout;
 
-    // Filter and display products
-    function filterProducts(searchTerm) {
-      const products = getAllProducts();
-      const filteredProducts = products.filter(product => 
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      const productGrid = document.getElementById('productGrid');
-      
-      if (filteredProducts.length === 0) {
-        productGrid.innerHTML = '<div class="no-results">No products found</div>';
-        return;
-      }
-      
-      productGrid.innerHTML = filteredProducts.map(product => 
-        createProductCard(product)
-      ).join('');
-    }
-
-    // Quick add to order function
-    function quickAddToOrder(productId, productName, productPrice) {
-      const productSelect = document.querySelector('select[name="product_id"]');
-      const quantityInput = document.querySelector('input[name="quantity"]');
-      
-      if (productSelect && quantityInput) {
-        productSelect.value = productId;
-        quantityInput.value = "1";
-        // Trigger the existing addToOrder function
-        addToOrder();
-      }
-    }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      // Display all products initially
-      filterProducts('');
-      
-      // Add search input event listener
-      const searchInput = document.getElementById('productSearch');
-      let debounceTimeout;
-      
-      searchInput.addEventListener('input', function(e) {
+    searchInput.addEventListener('input', function(e) {
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(() => {
-          filterProducts(e.target.value);
-        }, 300); // Debounce for better performance
-      });
+            const searchTerm = e.target.value.toLowerCase().trim();
+            filterAndDisplayProducts(searchTerm);
+        }, 300);
     });
+
+    // Initial display of all products
+    filterAndDisplayProducts('');
+});
+
+// Enhanced filter function with multiple search criteria
+function filterAndDisplayProducts(searchTerm) {
+    const filteredProducts = allProducts.filter(product => {
+        if (!searchTerm) return true;
+        
+        // Search in product name
+        if (product.name.toLowerCase().includes(searchTerm)) return true;
+        
+        // Search in price (if searchTerm is a number)
+        const searchNumber = parseFloat(searchTerm);
+        if (!isNaN(searchNumber) && product.price === searchNumber) return true;
+        
+        // Search in category
+        if (product.category.toLowerCase().includes(searchTerm)) return true;
+        
+        return false;
+    });
+
+    displayProducts(filteredProducts);
+}
+
+// Enhanced display function with better UI feedback
+function displayProducts(products) {
+    const productGrid = document.getElementById('productGrid');
+    
+    if (products.length === 0) {
+        productGrid.innerHTML = `
+            <div class="no-results">
+                <div class="text-center text-gray-500 my-8">
+                    <i class="fas fa-search mb-3"></i>
+                    <p>No products found</p>
+                </div>
+            </div>`;
+        return;
+    }
+
+    productGrid.innerHTML = products.map(product => `
+        <div class="product-card" data-product-id="${product.id}">
+            <img src="uploads/products/${product.image || 'default.jpg'}" 
+                 onerror="this.src='/api/placeholder/400/300'"
+                 alt="${escapeHtml(product.name)}" 
+                 class="product-image">
+            <div class="product-info">
+                <div class="product-name">${escapeHtml(product.name)}</div>
+                <div class="product-price">EGP ${product.price.toFixed(2)}</div>
+                <button class="add-to-cart" onclick="quickAddToOrder(${product.id}, '${escapeHtml(product.name)}', ${product.price})">
+                    Add to Order
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Utility function to escape HTML and prevent XSS
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Quick add to order with animation feedback
+function quickAddToOrder(productId, productName, productPrice) {
+    const productSelect = document.querySelector('select[name="product_id"]');
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    
+    if (productSelect && quantityInput) {
+        productSelect.value = productId;
+        quantityInput.value = "1";
+        
+        // Add visual feedback
+        const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+        if (productCard) {
+            productCard.classList.add('adding-to-cart');
+            setTimeout(() => {
+                productCard.classList.remove('adding-to-cart');
+            }, 500);
+        }
+        
+        // Trigger the existing addToOrder function
+        addToOrder();
+    }
+}
+
+// Add these styles to your existing CSS
+const styles = `
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.adding-to-cart {
+    animation: addToCartPulse 0.5s ease;
+}
+
+@keyframes addToCartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    text-align: center;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.product-grid {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.product-grid.loading {
+    opacity: 0.5;
+}
+`;
 
 
 </script>

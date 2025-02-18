@@ -91,4 +91,117 @@ class Product {
             return false;
         }
     }
+    public function delete() {
+      try {
+          $this->conn->beginTransaction();
+
+          // First check if the product is referenced in order_products
+          $check_query = "SELECT COUNT(*) FROM order_products WHERE product_id = ?";
+          $check_stmt = $this->conn->prepare($check_query);
+          $check_stmt->execute([$this->product_id]);
+          $count = $check_stmt->fetchColumn();
+
+          if ($count > 0) {
+              throw new Exception("Cannot delete product as it is referenced in orders");
+          }
+
+          // Get the image filename
+          $query = "SELECT image FROM " . $this->table_name . " WHERE product_id = ?";
+          $stmt = $this->conn->prepare($query);
+          $stmt->execute([$this->product_id]);
+          $row = $stmt->fetch(PDO::FETCH_ASSOC);
+          
+          // Delete the product record first
+          $delete_query = "DELETE FROM " . $this->table_name . " WHERE product_id = ?";
+          $delete_stmt = $this->conn->prepare($delete_query);
+          $result = $delete_stmt->execute([$this->product_id]);
+          
+          if ($result && $row && $row['image']) {
+              // Only attempt to delete the file if product was successfully deleted from database
+              $image_path = dirname(__FILE__) . '/uploads/products/' . $row['image'];
+              if (file_exists($image_path)) {
+                  unlink($image_path);
+              }
+          }
+
+          $this->conn->commit();
+          return true;
+      } catch(Exception $e) {
+          $this->conn->rollBack();
+          error_log("Error deleting product: " . $e->getMessage());
+          throw new Exception($e->getMessage());
+      }
+  }
+
+  public function update() {
+      try {
+          $this->conn->beginTransaction();
+
+          // Validate inputs
+          if (empty($this->product_name) || $this->product_price <= 0 || $this->quantity < 0) {
+              throw new Exception("Invalid input values");
+          }
+
+          $query = "UPDATE " . $this->table_name . "
+                  SET product_name = :name,
+                      category_id = :category_id,
+                      product_price = :price,
+                      quantity = :quantity";
+          
+          // Only include image in update if a new one is provided
+          if ($this->image) {
+              $query .= ", image = :image";
+          }
+          
+          $query .= " WHERE product_id = :product_id";
+          
+          $stmt = $this->conn->prepare($query);
+          
+          // Sanitize and bind values
+          $this->product_name = htmlspecialchars(strip_tags($this->product_name));
+          $this->category_id = filter_var($this->category_id, FILTER_VALIDATE_INT);
+          $this->product_price = filter_var($this->product_price, FILTER_VALIDATE_FLOAT);
+          $this->quantity = filter_var($this->quantity, FILTER_VALIDATE_INT);
+          
+          $stmt->bindParam(":name", $this->product_name);
+          $stmt->bindParam(":category_id", $this->category_id);
+          $stmt->bindParam(":price", $this->product_price);
+          $stmt->bindParam(":quantity", $this->quantity);
+          $stmt->bindParam(":product_id", $this->product_id);
+          
+          if ($this->image) {
+              $stmt->bindParam(":image", $this->image);
+          }
+          
+          $result = $stmt->execute();
+          
+          if (!$result) {
+              throw new Exception("Failed to update product");
+          }
+
+          $this->conn->commit();
+          return true;
+      } catch(Exception $e) {
+          $this->conn->rollBack();
+          error_log("Error updating product: " . $e->getMessage());
+          throw new Exception($e->getMessage());
+      }
+  }
+  
+  public function readOne() {
+      try {
+          $query = "SELECT p.*, c.category_name 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN categories c ON p.category_id = c.category_id
+                  WHERE p.product_id = ?";
+          
+          $stmt = $this->conn->prepare($query);
+          $stmt->execute([$this->product_id]);
+          
+          return $stmt->fetch(PDO::FETCH_ASSOC);
+      } catch(PDOException $e) {
+          error_log("Error reading product: " . $e->getMessage());
+          return false;
+      }
+  }
 }
