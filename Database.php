@@ -19,38 +19,13 @@ class Database {
         }
     }
 
-    public function select($table, $conditions = [], $join = null) {
-        try {
-            $sql = "SELECT * FROM $table";
-            
-            if ($join) {
-                $sql .= " $join";
-            }
-            
-            if (!empty($conditions)) {
-                $sql .= " WHERE ";
-                $whereClauses = [];
-                foreach ($conditions as $key => $value) {
-                    $whereClauses[] = "$key = :$key";
-                }
-                $sql .= implode(" AND ", $whereClauses);
-            }
-
-            $stmt = $this->conn->prepare($sql);
-            
-            if (!empty($conditions)) {
-                foreach ($conditions as $key => $value) {
-                    $stmt->bindValue(":$key", $value);
-                }
-            }
-            
-            $stmt->execute();
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            echo "Select failed: " . $e->getMessage();
-            return false;
-        }
+    public function select($table) {
+        $sql = "SELECT * FROM $table";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll();
     }
+
+
 
     public function insert($table, $data) {
         try {

@@ -1,7 +1,5 @@
 body {
-  background-image: url("../../background.jpg");
-  background-size: cover;
-  background-repeat: no-repeat; /* Light Gray */
+  background-image: url(../../background.jpg);
 }
 .container {
   max-width: 1200px;

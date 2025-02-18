@@ -4,7 +4,8 @@ require_once 'Database.php';
 
 
 $db = new Database();
-$users = $db->select('users', [], null);
+// $users = $db->select('users', [], null);
+$users = $db->select('users');
 ?>
 
 <!DOCTYPE html>
@@ -30,11 +31,11 @@ $users = $db->select('users', [], null);
             <div class="row g-2">
                 <div class="col-md-3">
                     <label class="form-label">Start Date</label>
-                    <input type="date" id="start_date" name="start_date" class="form-control">
+                    <input type="date" id="start_date" name="start_date" class="form-control"  required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">End Date</label>
-                    <input type="date" id="end_date" name="end_date" class="form-control">
+                    <input type="date" id="end_date" name="end_date" class="form-control" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">User</label>
