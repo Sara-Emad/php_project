@@ -1,3 +1,14 @@
+<?php
+
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login_form.php");
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,7 +44,16 @@
                         <a class="nav-link" href="contactus.php">Contact Us</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary" href="adduser.php">Sign up</a>
+                        <a class="nav-link" href="">My orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-success me-2" href="index.php">Place Order</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="logout.php">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="index.php">Admin</a>
                     </li>
                 </ul>
             </div>

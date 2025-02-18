@@ -2,7 +2,7 @@
 class Database {
 
     private $host = "localhost";
-    private $dbname = "cafe1";
+    private $dbname = "cafe2";
     private $username = "root";
     private $password = "";
 private $conn;
@@ -26,6 +26,30 @@ public function __construct() {
     }
 //!_____________________________________________________________________
 
+
+public function update($table, $data, $id) {
+    try {
+        $setClauses = [];
+        foreach ($data as $key => $value) {
+            $setClauses[] = "$key = :$key";
+        }
+        
+        $sql = "UPDATE $table SET " . implode(", ", $setClauses) . " WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        
+        foreach ($data as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+        $stmt->bindValue(":id", $id);
+        
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Update failed: " . $e->getMessage();
+        return false;
+    }
+}
+//!______________________________________________________________________
+
     public function insert($table, $data) {
         $columns = implode(", ", array_keys($data));
         $placeholders = ":" . implode(", :", array_keys($data));
@@ -37,5 +61,17 @@ public function __construct() {
         }
         return false;
     }
+//!______________________________________________________________________
+public function delete($table, $id) {
+    try {
+        $sql = "DELETE FROM $table WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":id", $id);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Delete failed: " . $e->getMessage();
+        return false;
+    }
+}
 }
 ?>
