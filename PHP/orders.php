@@ -2,6 +2,16 @@
 require_once '../php/database/config.php';
 require_once 'order.php';
 
+
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login_form.php');
+    exit;
+}
+
+
 $database = new Database();
 $db = $database->getConnection();
 $order = new Order($db);

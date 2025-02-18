@@ -1,11 +1,3 @@
-<?php
-require_once '../php/database/config.php';
-require_once 'User.php';
-
-$database = new Database();
-$db = $database->getConnection();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +15,7 @@ $db = $database->getConnection();
                         <h5>Add New User</h5>
                     </div>
                     <div class="card-body">
-                        <form id="userForm" method="POST" action="process_user.php">
+                        <form id="userForm" method="POST">
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
                                 <input type="text" class="form-control" name="name" required>
@@ -66,5 +58,43 @@ $db = $database->getConnection();
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Show loading state
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Creating user...';
+    
+    fetch('process_user.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert('User created successfully! Please login.');
+            window.location.href = 'login_form.php'; // Redirect to login page
+        } else {
+            alert(data.message || 'Error creating user');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the user');
+    })
+    .finally(() => {
+        // Reset button state
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+    });
+});
+    </script>
 </body>
 </html>

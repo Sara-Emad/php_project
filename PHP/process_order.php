@@ -20,9 +20,20 @@ try {
     $database = new Database();
     $db = $database->getConnection();
     
-    // Hardcode user_id for testing
-    $user_id = 1; // Replace with $_SESSION['user_id'] in production
-    
+    // // Hardcode user_id for testing
+    // $user_id = 1; // Replace with $_SESSION['user_id'] in production
+    // ====================================================================================
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "User not authenticated"
+    ]);
+    exit;
+}
+
+// Use the actual logged-in user's ID
+$user_id = $_SESSION['user_id'];
     // Debug products data
     error_log("Products data: " . print_r($_POST['products'], true));
 

@@ -3,6 +3,20 @@
 require_once '../php/database/config.php';
 require_once '../php/products.php';
 
+
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // If user is not logged in, check if they're coming from registration
+    if (!isset($_SESSION['registration_complete'])) {
+        header('Location: adduser.php');
+    } else {
+        header('Location: login_form.php');
+    }
+    exit;
+}
+
 // Initialize database connection
 $database = new Database();
 $db = $database->getConnection();
