@@ -1,7 +1,12 @@
 <?php
+require_once('../Database/Database.php');
 require_once('functionallity.php');
-?>
 
+$db = new Database();
+$orders = $db->select('orders');
+$products = $db->select('products');
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,10 +17,7 @@ require_once('functionallity.php');
     <title>My Orders</title>
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-    </style>
 </head>
 
 <body>
@@ -36,14 +38,9 @@ require_once('functionallity.php');
             <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     <img src="/api/placeholder/40/40" alt="User Avatar" class="rounded-circle" width="30">
-                    <span class="ms-2"><?php echo "{$name}" ?></span>
+                    <span class="ms-2"><?php echo isset($name) ? htmlspecialchars($name) : "User"; ?></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#">Profile</a></li>
-                    <li><a class="dropdown-item" href="#">Settings</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
                     <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                 </ul>
             </div>
@@ -60,23 +57,33 @@ require_once('functionallity.php');
                             <tr>
                                 <th>Order Date</th>
                                 <th>Status</th>
-                                <th>Amount</th>
-                                <th>Action</th>
+                                <th>Total Price</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            if (!empty($result_orders)) {
-                                foreach ($result_orders as $order) {
+                            if (!empty($orders)) {
+                                foreach ($orders as $order) {
+                                    
+                                    $orderId = $order['order_id'];
+                                    $orders = $db->select("orders");
+
+                                    $totalPrice = 0;
+                                    foreach ($orders as $item) {
+                                        $productId = $item['product_id'];
+                                        $product = $db->select("products");
+                                        if ($product) {
+                                            $totalPrice += $product['product_price'] * $item['quantity'];
+                                        }
+                                    }
                                     echo "<tr>";
-                                    echo "<td>" . date("Y/m/d h:i A", strtotime($order['order_date'])) . "</td>";
-                                    echo "<td><span class='status-badge " . getStatusBadgeClass($order['status']) . "'>" . htmlspecialchars($order['status']) . "</span></td>";
-                                    echo "<td>" . number_format($order['total_amount'], 2) . " EGP</td>";
-                                    echo "<td>" . (canBeCancelled($order['status']) ? "<button class='btn btn-sm btn-outline-danger'>CANCEL</button>" : "<button class='btn btn-sm btn-outline-secondary' disabled>COMPLETED</button>") . "</td>";
+                                    echo "<td>" . date("Y/m/d h:i A", strtotime($order['date'])) . "</td>";
+                                    echo "<td><span class='status-badge " . htmlspecialchars($order['status']) . "'>" . htmlspecialchars($order['status']) . "</span></td>";
+                                    echo "<td>$" . number_format($totalPrice, 2) . "</td>";
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='4' class='text-center py-4'>No orders found for the selected date range.</td></tr>";
+                                echo "<tr><td colspan='3' class='text-center py-4'>No orders found.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -85,7 +92,6 @@ require_once('functionallity.php');
             </div>
         </div>
     </div>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
