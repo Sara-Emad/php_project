@@ -1,6 +1,4 @@
 <?php
-
-
 require_once 'Database.php';
 
 $db = new Database();
@@ -11,12 +9,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ext = trim($_POST['ext']);
     $room = trim($_POST['room']);
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-    $role = trim($_POST['role']); 
+    $role = trim($_POST['role']);
 
     $users = $db->select('users');
     foreach ($users as $user) {
         if ($user['email'] === $email) {
-            echo "<div class='alert alert-danger text-center'>Email is already logged in </div>";
+            echo "<div class='alert alert-danger text-center'>Email is already registered!</div>";
             exit;
         }
     }
@@ -31,48 +29,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ];
 
     if ($db->insert("users", $data)) {
-        echo "<div class='alert alert-success text-center'>تم التسجيل بنجاح!</div>";
+        echo "<div class='alert alert-success text-center'>Registration successful!</div>";
         header('Location: login_form.php');
-        exit; // 🔹 ضروري لضمان التوجيه الصحيح
+        exit;
     } else {
-        echo "<div class='alert alert-danger text-center'>حدث خطأ أثناء التسجيل!</div>";
+        echo "<div class='alert alert-danger text-center'>An error occurred during registration!</div>";
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// require_once 'Database.php';
-
-
-// $db = new Database();
-// if ($_SERVER["REQUEST_METHOD"] == "POST") {
-//     $name = $_POST['name'];
-//     $email = $_POST['email'];
-//     $ext = $_POST['ext'];
-//     $room = $_POST['room'];
-//     $password = password_hash($_POST['password'], PASSWORD_BCRYPT); 
-//     $role = $_POST['role'];
-//     $data = [
-//         "name" => $name,
-//         "email" => $email,
-//         "room" => $room,
-//         "ext" => $ext,
-//         "password" => $password,
-//         "role" => $role
-//     ];
-
-//     $db->insert("users", $data);
-
-//     echo "<div class='alert alert-success text-center'>Registration Successful!</div>";
-//     header('Location: login_form.php');
-// }
 ?>

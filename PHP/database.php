@@ -25,8 +25,6 @@ public function __construct() {
         return $stmt->fetchAll();
     }
 //!_____________________________________________________________________
-
-
 public function update($table, $data, $id) {
     try {
         $setClauses = [];
@@ -52,7 +50,7 @@ public function update($table, $data, $id) {
 
     public function insert($table, $data) {
         $columns = implode(", ", array_keys($data));
-        $placeholders = ":" . implode(", :", array_keys($data));
+        $placeholders = ":" . implode(", :", array_keys($data)); 
         $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
         
         $stmt = $this->conn->prepare($sql);
