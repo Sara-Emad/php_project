@@ -17,6 +17,42 @@ class Database {
             throw new Exception("Connection failed: " . $e->getMessage());
         }
     }
+//?_____________________________________select_____________________________________________________________
+
+    // public function select($table, $condition = "", $params = []) {
+    //     try {
+    //         $sql = "SELECT * FROM $table";
+    //         if (!empty($condition)) {
+    //             $sql .= " WHERE $condition";
+    //         }
+    
+    //         $stmt = $this->conn->prepare($sql);
+    //         $stmt->execute($params);
+    
+    //         return $stmt->fetchAll();
+    //     } catch (PDOException $e) {
+    //         echo "Select failed: " . $e->getMessage();
+    //         return [];
+    //     }
+    // }
+// public function select($table, $columns = "*", $condition = "", $params = []) {
+//     try {
+//         $sql = "SELECT $columns FROM $table";
+//         if (!empty($condition)) {
+//             $sql .= " WHERE $condition";
+//         }
+
+//         $stmt = $this->conn->prepare($sql);
+//         $stmt->execute($params);
+
+//         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+//     } catch (PDOException $e) {
+//         echo "Select failed: " . $e->getMessage();
+//         return [];
+//     }
+// }
+
+
 
     public function select($table) {
         try {
@@ -28,29 +64,44 @@ class Database {
         }
     }
 
-    public function update($table, $data, $id) {
+
+    public function getOrders($startDate, $endDate, $userId = null) {
         try {
-            $setClauses = [];
-            foreach ($data as $key => $value) {
-                $setClauses[] = "$key = :$key";
+            $sql = "SELECT 
+                        u.name,
+                        o.date,
+                        p.product_name as order_name,
+                        op.quantity,
+                        (op.quantity * p.product_price) as total_price
+                    FROM orders o
+                    JOIN users u ON o.user_id = u.user_id
+                    JOIN order_products op ON o.order_id = op.order_id
+                    JOIN products p ON op.product_id = p.product_id
+                    WHERE o.date BETWEEN :start_date AND :end_date";
+            
+            if ($userId) {
+                $sql .= " AND o.user_id = :user_id";
             }
             
-            // For orders table, use order_id instead of id
-            $idField = ($table === 'orders') ? 'order_id' : 'id';
+            $sql .= " ORDER BY o.date DESC";
             
-            $sql = "UPDATE $table SET " . implode(", ", $setClauses) . " WHERE $idField = :id";
             $stmt = $this->conn->prepare($sql);
+            // Using bindParam() instead of bindValue()
+            $stmt->bindParam(":start_date", $startDate);
+            $stmt->bindParam(":end_date", $endDate);
             
-            foreach ($data as $key => $value) {
-                $stmt->bindValue(":$key", $value);
+            if ($userId) {
+                $stmt->bindParam(":user_id", $userId);
             }
-            $stmt->bindValue(":id", $id);
             
-            return $stmt->execute();
+            $stmt->execute();
+            return $stmt->fetchAll();
         } catch (PDOException $e) {
-            throw new Exception("Update failed: " . $e->getMessage());
+            echo "Failed to get orders: " . $e->getMessage();
+            return false;
         }
     }
+//?_____________________________________insert_____________________________________________________________
 
     public function insert($table, $data) {
         try {
@@ -71,18 +122,53 @@ class Database {
             throw new Exception("Insert failed: " . $e->getMessage());
         }
     }
-
+//?__________________________________________update and delete____________________________________________
+    public function update($table, $data, $id) {
+        try {
+            
+            $primaryKey = $this->getPrimaryKey($table);
+    
+            $setClauses = [];
+            foreach ($data as $key => $value) {
+                $setClauses[] = "$key = :$key";
+            }
+    
+            $sql = "UPDATE $table SET " . implode(", ", $setClauses) . " WHERE $primaryKey = :id";
+            $stmt = $this->conn->prepare($sql);
+    
+            foreach ($data as $key => $value) {
+                $stmt->bindValue(":$key", $value);
+            }
+            $stmt->bindValue(":id", $id);
+    
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            throw new Exception("Update failed: " . $e->getMessage());
+        }
+    }
+    
     public function delete($table, $id) {
         try {
-            // For orders table, use order_id instead of id
-            $idField = ($table === 'orders') ? 'order_id' : 'id';
+
+            $primaryKey = $this->getPrimaryKey($table);
             
-            $sql = "DELETE FROM $table WHERE $idField = :id";
+            $sql = "DELETE FROM $table WHERE $primaryKey = :id";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(":id", $id);
+        
+            $stmt->bindParam(":id", $id);
             return $stmt->execute();
         } catch (PDOException $e) {
             throw new Exception("Delete failed: " . $e->getMessage());
         }
     }
+
+    private function getPrimaryKey($table) {
+        $primaryKeys = [
+            'users' => 'user_id',
+            'products' => 'product_id',
+            'orders' => 'order_id',
+        ];
+        return $primaryKeys[$table] ?? 'id'; 
+    }
 }
+//!_______________________________________________________________________________________
