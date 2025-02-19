@@ -1,5 +1,5 @@
 <?php
-require_once('orders.php');
+require_once('my_orders(functions).php');
 ?>
 
 <!DOCTYPE html>
@@ -15,7 +15,6 @@ require_once('orders.php');
 </head>
 
 <body>
-
     <nav class="navbar navbar-expand-lg navbar-light bg-white">
         <div class="container">
             <a class="navbar-brand" href="#"><strong>Cafe</strong></a>
@@ -31,8 +30,7 @@ require_once('orders.php');
             </div>
             <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <img src="/api/placeholder/40/40" alt="User Avatar" class="rounded-circle" width="30">
-                    <span class="ms-2"><?php echo isset($name) ? htmlspecialchars($name) : "User"; ?></span>
+                <span class="ms-2"><?php echo isset($users['name']) ? $users['name'] : 'User'; ?></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="logout.php">Logout</a></li>
@@ -52,17 +50,20 @@ require_once('orders.php');
                                 <th>Order Date</th>
                                 <th>Status</th>
                                 <th>Total Price</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             if (!empty($orders)) {
                                 foreach ($orders as $order) {
-                                    $totalPrice = calculateTotalPrice($db, $order['order_id']);
+                                    $orderId = $order['order_id'];
+                                    $totalPrice = calculateTotalPrice($db, $orderId);
                                     echo "<tr>";
                                     echo "<td>" . date("Y/m/d h:i A", strtotime($order['date'])) . "</td>";
-                                    echo "<td><span class='status-badge " . htmlspecialchars($order['status']) . "'>" . htmlspecialchars($order['status']) . "</span></td>";
-                                    echo "<td>$" . number_format($totalPrice, 2) . "</td>";
+                                    echo "<td><span class='status-badge " . $order['status'] . "'>" . htmlspecialchars($order['status']) . "</span></td>";
+                                    echo "<td>$" . $totalPrice . "</td>";
+                                    echo "<td></td>";
                                     echo "</tr>";
                                 }
                             } else {
