@@ -25,18 +25,18 @@ class Database {
         return $stmt->fetchAll();
     }
 
-
-
     public function insert($table, $data) {
         try {
             $columns = implode(", ", array_keys($data));
-            $values = ":" . implode(", :", array_keys($data));
+            $placeholders = ":" . implode(", :", array_keys($data));
             
-            $sql = "INSERT INTO $table ($columns) VALUES ($values)";
+            $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
             $stmt = $this->conn->prepare($sql);
             
-            foreach ($data as $key => $value) {
-                $stmt->bindValue(":$key", $value);
+            // Using bindParam() instead of bindValue()
+            foreach ($data as $key => &$value) {
+                // The & symbol is crucial here - it passes by reference
+                $stmt->bindParam(":$key", $value);
             }
             
             $stmt->execute();
@@ -57,10 +57,12 @@ class Database {
             $sql = "UPDATE $table SET " . implode(", ", $setClauses) . " WHERE id = :id";
             $stmt = $this->conn->prepare($sql);
             
-            foreach ($data as $key => $value) {
-                $stmt->bindValue(":$key", $value);
+            // Using bindParam() instead of bindValue()
+            foreach ($data as $key => &$value) {
+                $stmt->bindParam(":$key", $value);
             }
-            $stmt->bindValue(":id", $id);
+            // We need to bind the ID parameter by reference too
+            $stmt->bindParam(":id", $id);
             
             return $stmt->execute();
         } catch (PDOException $e) {
@@ -73,7 +75,8 @@ class Database {
         try {
             $sql = "DELETE FROM $table WHERE id = :id";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(":id", $id);
+            // Using bindParam() instead of bindValue()
+            $stmt->bindParam(":id", $id);
             return $stmt->execute();
         } catch (PDOException $e) {
             echo "Delete failed: " . $e->getMessage();
@@ -103,11 +106,12 @@ class Database {
             $sql .= " ORDER BY o.date DESC";
             
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(":start_date", $startDate);
-            $stmt->bindValue(":end_date", $endDate);
+            // Using bindParam() instead of bindValue()
+            $stmt->bindParam(":start_date", $startDate);
+            $stmt->bindParam(":end_date", $endDate);
             
             if ($userId) {
-                $stmt->bindValue(":user_id", $userId);
+                $stmt->bindParam(":user_id", $userId);
             }
             
             $stmt->execute();

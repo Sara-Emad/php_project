@@ -1,4 +1,5 @@
 <?php
+require_once 'header.php';
 require_once 'Database.php';
 
 
@@ -24,7 +25,7 @@ $users = $db->select('users');
 </head>
 <body >
     <div class="container mt-5">
-        <h2 class="mb-4 text-center">Checks </h2>
+        <h2 class="mb-4 text-center" id="checks">Checks </h2>
 
         <!-- Filters Section -->
         <div class="card p-3 mb-4 shadow-sm">
