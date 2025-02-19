@@ -2,7 +2,7 @@
 class Database {
 
     private $host = "localhost";
-    private $dbname = "cafe2";
+    private $dbname = "cafe1";
     private $username = "root";
     private $password = "";
 private $conn;
@@ -19,11 +19,23 @@ public function __construct() {
     }
 }
 //!________________________________________________________________________
-    public function select($table) {
+public function select($table, $condition = "", $params = []) {
+    try {
         $sql = "SELECT * FROM $table";
-        $stmt = $this->conn->query($sql);
+        if (!empty($condition)) {
+            $sql .= " WHERE $condition";
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+
         return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo "Select failed: " . $e->getMessage();
+        return [];
     }
+}
+
 //!_____________________________________________________________________
 public function update($table, $data, $id) {
     try {
@@ -32,7 +44,7 @@ public function update($table, $data, $id) {
             $setClauses[] = "$key = :$key";
         }
         
-        $sql = "UPDATE $table SET " . implode(", ", $setClauses) . " WHERE id = :id";
+        $sql = "UPDATE $table SET " . implode(", ", $setClauses) . " WHERE order_id = :id";  
         $stmt = $this->conn->prepare($sql);
         
         foreach ($data as $key => $value) {
@@ -46,6 +58,7 @@ public function update($table, $data, $id) {
         return false;
     }
 }
+
 //!______________________________________________________________________
 
     public function insert($table, $data) {

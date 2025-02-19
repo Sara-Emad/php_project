@@ -1,5 +1,5 @@
 <?php
-require_once('my_orders_functions.php');
+require_once('my_orders(functions).php');
 ?>
 
 <!DOCTYPE html>
@@ -30,7 +30,7 @@ require_once('my_orders_functions.php');
             </div>
             <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <span class="ms-2"><?php echo isset($name) ? htmlspecialchars($name) : 'User'; ?></span>
+                    <span class="ms-2"><?php echo isset($name) ? $name : 'User'; ?></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="logout.php">Logout</a></li>
@@ -43,6 +43,24 @@ require_once('my_orders_functions.php');
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title mb-4">My Orders</h2>
+                
+                
+                <form method="GET" action="my_orders.php" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="start_date" class="form-label">Start Date:</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="end_date" class="form-label">End Date:</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </div>
+                </form>
+                
                 <div class="table-responsive">
                     <table class="table">
                         <thead class="table-light">
@@ -61,17 +79,16 @@ require_once('my_orders_functions.php');
                                     $totalPrice = calculateTotalPrice($db, $orderId);
                                     echo "<tr>";
                                     echo "<td>" . date("Y/m/d h:i A", strtotime($order['date'])) . "</td>";
-                                    echo "<td><span class='status-badge " . $order['status'] . "'>" . htmlspecialchars($order['status']) . "</span></td>";
+                                    echo "<td><span class='status-badge " . $order['status'] . "'>" . $order['status'] . "</span></td>";
                                     echo "<td>$" . $totalPrice . "</td>";
                                     echo "<td>";
-
-                                    // Show the Cancel button only if the order status is Pending or Processing
+                                    
                                     if ($order['status'] === "Pending" || $order['status'] === "Processing") {
-                                        echo "<a href='my_orders_functions.php?cancel_order_id=$orderId' class='btn btn-warning btn-sm' onclick='return confirm(\"Are you sure you want to cancel this order?\");'>";
-                                        echo "<i class='fa fa-times'></i> Cancel";
-                                        echo "</a>";
+                                        echo "<a href='#' class='btn btn-warning btn-sm cancel-order-btn' data-order-id='$orderId'>";
+                                        echo "<i class='fa fa-xmark'></i> Cancel";
+                                        echo "</a>";                                        
                                     }
-
+                                    
                                     echo "</td>";
                                     echo "</tr>";
                                 }
@@ -87,6 +104,8 @@ require_once('my_orders_functions.php');
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/script.js"></script>
 </body>
 
 </html>
+
