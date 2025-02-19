@@ -1,11 +1,5 @@
 <?php
-require_once('../Database/Database.php');
-require_once('functionallity.php');
-
-$db = new Database();
-$orders = $db->select('orders');
-$products = $db->select('products');
-
+require_once('orders.php');
 ?>
 
 <!DOCTYPE html>
@@ -64,18 +58,7 @@ $products = $db->select('products');
                             <?php
                             if (!empty($orders)) {
                                 foreach ($orders as $order) {
-                                    
-                                    $orderId = $order['order_id'];
-                                    $orders = $db->select("orders");
-
-                                    $totalPrice = 0;
-                                    foreach ($orders as $item) {
-                                        $productId = $item['product_id'];
-                                        $product = $db->select("products");
-                                        if ($product) {
-                                            $totalPrice += $product['product_price'] * $item['quantity'];
-                                        }
-                                    }
+                                    $totalPrice = calculateTotalPrice($db, $order['order_id']);
                                     echo "<tr>";
                                     echo "<td>" . date("Y/m/d h:i A", strtotime($order['date'])) . "</td>";
                                     echo "<td><span class='status-badge " . htmlspecialchars($order['status']) . "'>" . htmlspecialchars($order['status']) . "</span></td>";
