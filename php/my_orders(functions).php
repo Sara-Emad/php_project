@@ -8,14 +8,12 @@ $db = new Database();
 if (isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id'];
 
-
-    $user = $db->select("users");
+    $user = $db->select("users", "user_id = ?", [$userId]);
 
     if (!empty($user)) {
         $name = $user[0]['name'];
     }
 }
-
 
 $orders = $db->select('orders');
 $products = $db->select('products');
@@ -42,3 +40,20 @@ function calculateTotalPrice($db, $orderId)
 
     return number_format($totalPrice, 2);
 }
+
+
+if (isset($_GET['cancel_order_id'])) {
+    $orderId = $_GET['cancel_order_id'];
+
+
+    $order = $db->select("orders[$orderId]");
+
+    if (!empty($order) && ($order[0]['status'] === "Pending" || $order[0]['status'] === "Processing")) {
+        $db->update("orders", ["status" => "Canceled"], [$orderId]);
+    }
+
+
+    header("Location: my_orders.php");
+    exit();
+}
+?>
