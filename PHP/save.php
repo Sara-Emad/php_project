@@ -50,7 +50,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($errors)) {
-        $upload_dir = '../uploads/';
+        // $upload_dir = '../uploads/';
+        $upload_dir = 'uploads/products/';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }

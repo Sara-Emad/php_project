@@ -54,7 +54,7 @@ if (!empty($_SESSION['errors'])) {
               <a class="nav-link" href="checks.php">Checks</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="Manual order.php">Manual Order</a>
+              <a class="nav-link" href="createorder.php">Manual Order</a>
             </li>
           </ul>
         </div>

@@ -1,12 +1,13 @@
 let orderItems = [];
 let total = 0;
+let allProducts = [];
 
 function addToOrder() {
     const productSelect = document.querySelector('select[name="product_id"]');
     const quantityInput = document.querySelector('input[name="quantity"]');
-    
+
     if (!productSelect.value) {
-        alert('Please select a product');
+        showError('Please select a product');
         return;
     }
 
@@ -15,13 +16,12 @@ function addToOrder() {
     const productName = productOption.text.split(' - ')[0];
     const productPrice = parseFloat(productOption.text.split('EGP ')[1]);
     const quantity = parseInt(quantityInput.value);
-    
+
     if (quantity <= 0 || isNaN(quantity)) {
-        alert('Please enter a valid quantity');
+        showError('Please enter a valid quantity');
         return;
     }
 
-    // Add item to order
     orderItems.push({
         product_id: productId,
         name: productName,
@@ -29,32 +29,52 @@ function addToOrder() {
         price: productPrice,
         total: productPrice * quantity
     });
-    
+
     updateOrderSummary();
-    
-    // Keep the selected product and only reset quantity
     quantityInput.value = "1";
 }
 
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+    errorDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.getElementById('orderForm').prepend(errorDiv);
+
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 5000);
+}
+
+// Improved updateOrderSummary function (only this version)
 function updateOrderSummary() {
     const orderItemsDiv = document.getElementById('orderItems');
     orderItemsDiv.innerHTML = '';
     total = 0;
     
+    if (orderItems.length === 0) {
+        orderItemsDiv.innerHTML = '<p class="text-muted">No items in order</p>';
+        document.getElementById('orderTotal').textContent = 'EGP 0.00';
+        return;
+    }
+    
     orderItems.forEach((item, index) => {
-        orderItemsDiv.innerHTML += `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <div>
-                    <span class="fw-bold">${item.name}</span>
-                    <br>
-                    <small>Qty: ${item.quantity} × EGP ${item.price}</small>
-                </div>
-                <div class="text-end">
-                    <div>EGP ${item.total.toFixed(2)}</div>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${index})">×</button>
-                </div>
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'd-flex justify-content-between align-items-center mb-2';
+        itemDiv.innerHTML = `
+            <div>
+                <span class="fw-bold">${escapeHtml(item.name)}</span>
+                <br>
+                <small>Qty: ${item.quantity} × EGP ${item.price.toFixed(2)}</small>
+            </div>
+            <div class="text-end">
+                <div>EGP ${item.total.toFixed(2)}</div>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${index})">×</button>
             </div>
         `;
+        orderItemsDiv.appendChild(itemDiv);
         total += item.total;
     });
     
@@ -66,152 +86,204 @@ function removeItem(index) {
     updateOrderSummary();
 }
 
-document.getElementById('orderForm').onsubmit = function(e) {
-    e.preventDefault();
-    
-    if (orderItems.length === 0) {
-        alert('Please add at least one product to the order');
-        return false;
+document.addEventListener("DOMContentLoaded", function () {
+    const orderForm = document.getElementById("orderForm");
+
+    if (!orderForm) {
+        console.error("Error: orderForm not found in the DOM.");
+        return;
     }
 
-    const formData = new FormData();
-    
-    // Add each product to formData
-    orderItems.forEach((item, index) => {
-        formData.append(`products[${index}][product_id]`, item.product_id);
-        formData.append(`products[${index}][quantity]`, item.quantity);
-    });
-
-    // Add other form fields
-    formData.append('notes', document.querySelector('textarea[name="notes"]').value);
-    formData.append('room', document.querySelector('select[name="room"]').value);
-
-    // Show loading state
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalText = submitButton.innerHTML;
-    submitButton.disabled = true;
-    submitButton.innerHTML = 'Processing...';
-
-    fetch('process_order.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Order created successfully!');
-            // Clear form and order items
-            orderItems = [];
-            updateOrderSummary();
-            this.reset();
-            location.reload(); // Optional: reload the page after successful order
-        } else {
-            throw new Error(data.message || 'Failed to create order');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert(error.message || 'An error occurred while processing the order');
-    })
-    .finally(() => {
-        // Reset button state
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalText;
-    });
-
-    return false;
-};
-
-// Prevent form submission on enter key
-document.getElementById('orderForm').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+    orderForm.onsubmit = async function (e) {
         e.preventDefault();
+
+        if (orderItems.length === 0) {
+            showError("Please add at least one product to the order");
+            return false;
+        }
+
+        const orderData = {
+            products: orderItems.map((item) => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+            })),
+            notes: document.querySelector('textarea[name="notes"]').value,
+            room: document.querySelector('select[name="room"]').value,
+        };
+
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = "Processing...";
+
+        try {
+            // console.log("Attempting to fetch from:", "../../PHP/process_order.php");
+            const response = await fetch("../../PHP/process_order.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(orderData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                const successDiv = document.createElement("div");
+                successDiv.className = "alert alert-success";
+                successDiv.textContent = "Order created successfully!";
+                orderForm.prepend(successDiv);
+
+                orderItems = [];
+                updateOrderSummary();
+                orderForm.reset();
+
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                throw new Error(data.message || "Failed to create order");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            showError(error.message || "An error occurred while processing the order");
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
+        }
+
+        return false;
+    };
+    
+    // Initialize search functionality
+    // Get products from the select element and store them
+    const productSelect = document.querySelector('select[name="product_id"]');
+    allProducts = Array.from(productSelect.options)
+        .filter(option => option.value) // Skip the "Select Product" option
+        .map(option => {
+            const [name, priceText] = option.text.split(' - EGP ');
+            return {
+                id: option.value,
+                name: name.trim(),
+                price: parseFloat(priceText),
+                category: option.dataset.category || '',
+                image: option.dataset.image || ''
+            };
+        });
+
+    // Set up search input handler with debouncing
+    const searchInput = document.getElementById('productSearch');
+    let debounceTimeout;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                filterAndDisplayProducts(searchTerm);
+            }, 300);
+        });
+
+        // Initial display of all products
+        filterAndDisplayProducts('');
     }
 });
 
-// Store all products globally so we can filter them
-// Get all products from the select element
-function getAllProducts()
- {
-      const productSelect = document.querySelector('select[name="product_id"]');
-      const products = Array.from(productSelect.options)
-        .filter(option => option.value) // Skip the "Select Product" option
-        .map(option => {
-          const [name, price] = option.text.split(' - EGP ');
-          return {
-            id: option.value,
-            name: name.trim(),
-            price: parseFloat(price),
-            image: `/api/placeholder/400/300`
-          };
-        });
-      return products;
-  }
+// Enhanced filter function with multiple search criteria
+function filterAndDisplayProducts(searchTerm) {
+    const filteredProducts = allProducts.filter(product => {
+        if (!searchTerm) return true;
+        
+        // Search in product name
+        if (product.name.toLowerCase().includes(searchTerm)) return true;
+        
+        // Search in price (if searchTerm is a number)
+        const searchNumber = parseFloat(searchTerm);
+        if (!isNaN(searchNumber) && product.price === searchNumber) return true;
+        
+        // Search in category
+        if (product.category.toLowerCase().includes(searchTerm)) return true;
+        
+        return false;
+    });
 
-    // Create product card element
-    function createProductCard(product) {
-      return `
-        <div class="product-card">
-          <img src="${product.image}" alt="${product.name}" class="product-image">
-          <div class="product-info">
-            <div class="product-name">${product.name}</div>
-            <div class="product-price">EGP ${product.price.toFixed(2)}</div>
-            <button 
-              class="add-to-cart"
-              onclick="quickAddToOrder(${product.id}, '${product.name}', ${product.price})"
-            >
-              Add to Order
-            </button>
-          </div>
-        </div>
-      `;
-    }
+    displayProducts(filteredProducts);
+}
 
-    // Filter and display products
-    function filterProducts(searchTerm) {
-      const products = getAllProducts();
-      const filteredProducts = products.filter(product => 
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      const productGrid = document.getElementById('productGrid');
-      
-      if (filteredProducts.length === 0) {
-        productGrid.innerHTML = '<div class="no-results">No products found</div>';
+// Enhanced display function with proper image handling
+function displayProducts(products) {
+    const productGrid = document.getElementById('productGrid');
+    
+    if (!productGrid) {
+        console.error("Product grid element not found");
         return;
-      }
-      
-      productGrid.innerHTML = filteredProducts.map(product => 
-        createProductCard(product)
-      ).join('');
     }
+    
+    if (products.length === 0) {
+        productGrid.innerHTML = `
+            <div class="no-results">
+                <div class="text-center text-gray-500 my-8">
+                    <i class="fas fa-search mb-3"></i>
+                    <p>No products found</p>
+                </div>
+            </div>`;
+        return;
+    }
+    
+    productGrid.innerHTML = products.map(product => {
+        // Construct proper image path with proper template literal syntax
+        const imagePath = product.image 
+            ? `./uploads/products/${product.image}`
+            : './assets/images/default-product.jpg';
+            
+        return `
+            <div class="product-card" data-product-id="${product.id}">
+                <img src="${imagePath}" 
+                    alt="${escapeHtml(product.name)}"
+                    onerror="this.src='./assets/images/default-product.jpg'"
+                    class="product-image">
+                <div class="product-info">
+                    <div class="product-name">${escapeHtml(product.name)}</div>
+                    <div class="product-price">EGP ${product.price.toFixed(2)}</div>
+                    <button class="add-to-cart" onclick="quickAddToOrder(${product.id}, '${escapeHtml(product.name).replace(/'/g, "\\'").replace(/"/g, '\\"')}', ${product.price})">
+                        Add to Order
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
-    // Quick add to order function
-    function quickAddToOrder(productId, productName, productPrice) {
-      const productSelect = document.querySelector('select[name="product_id"]');
-      const quantityInput = document.querySelector('input[name="quantity"]');
-      
-      if (productSelect && quantityInput) {
+// Utility function to escape HTML and prevent XSS
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Quick add to order with animation feedback
+function quickAddToOrder(productId, productName, productPrice) {
+    const productSelect = document.querySelector('select[name="product_id"]');
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    
+    if (productSelect && quantityInput) {
         productSelect.value = productId;
         quantityInput.value = "1";
+        
+        // Add visual feedback
+        const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+        if (productCard) {
+            productCard.classList.add('adding-to-cart');
+            setTimeout(() => {
+                productCard.classList.remove('adding-to-cart');
+            }, 500);
+        }
+        
         // Trigger the existing addToOrder function
         addToOrder();
-      }
     }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      // Display all products initially
-      filterProducts('');
-      
-      // Add search input event listener
-      const searchInput = document.getElementById('productSearch');
-      let debounceTimeout;
-      
-      searchInput.addEventListener('input', function(e) {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => {
-          filterProducts(e.target.value);
-        }, 300); // Debounce for better performance
-      });
-    });
+}

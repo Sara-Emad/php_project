@@ -1,11 +1,11 @@
 <?php
 
-session_start();
+// session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login_form.php");
-    exit();
-}
+// if (!isset($_SESSION['user_id'])) {
+//     header("Location: login_form.php");
+//     exit();
+// }
 
 ?>
 
@@ -47,14 +47,14 @@ if (!isset($_SESSION['user_id'])) {
                         <a class="nav-link" href="">My orders</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-success me-2" href="index.php">Place Order</a>
+                        <a class="btn btn-success me-2" href="createorder.php">Place Order</a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-primary" href="logout.php">Logout</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary" href="index.php">Admin</a>
-                    </li>
+                    <!-- <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="index.php">Admin</a>
+                    </li> -->
                 </ul>
             </div>
         </div>
