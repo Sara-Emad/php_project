@@ -8,7 +8,6 @@ session_start();
 $db = new Database();
 
 $products = $db->select('products');
-// $categories = $db->select('categories');
 
 if (!$products) {
     $products = [];

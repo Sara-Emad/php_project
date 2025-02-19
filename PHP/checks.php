@@ -1,6 +1,6 @@
 <?php
+session_start();
 require_once 'database.php';
-
 
 
 $db = new Database();
@@ -25,37 +25,20 @@ $users = $db->select('users');
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark ">
-        <div class="container">
-
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="addproduct.html">Cafeteria</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active " href="index.php">Home</a>
-                    </li>
-                    <li class="nav-item ">
-                        <a class="nav-link" href="allproducts.php">Products</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="orders.php">Orders</a>
-                    </li>
-
-                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="checks.php">Checks</a>
-                        </li>
-                    <?php endif; ?>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="welcome(admin).php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="allproducts.php">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="allusers.php">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="checks.php">Checks</a></li>
+                    <li class="nav-item"><a class="btn btn-success" href="createorder(admin).php">create Order</a></li>
                 </ul>
-
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <div class="d-flex">
-                        <a class="btn btn-outline-light" href="logout.php">Logout</a>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </nav>

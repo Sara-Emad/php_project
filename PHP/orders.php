@@ -29,7 +29,7 @@ $orders = $db->getOrders();
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="home.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="welcome(admin).php">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="allproducts.php">Products</a></li>
                     <li class="nav-item"><a class="nav-link" href="allusers.php">Users</a></li>
                     <li class="nav-item"><a class="nav-link" href="checks.php">Checks</a></li>
@@ -53,7 +53,7 @@ $orders = $db->getOrders();
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($orders as $order): ?>
+                    <?php foreach ($orders as $order): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($order['order_id']); ?></td>
                             <td><?php echo htmlspecialchars($order['name']); ?></td>
@@ -68,7 +68,7 @@ $orders = $db->getOrders();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-                        <script src="../assets/javascript/checks.php"></script>
+    <script src="../assets/javascript/checks.php"></script>
 </body>
 
 </html>

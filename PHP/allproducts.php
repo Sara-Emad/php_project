@@ -26,47 +26,24 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['produ
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Products</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .product-image {
-            max-width: 100px;
-            max-height: 100px;
-        }
-        .availability {
-            font-weight: bold;
-        }
-        .available {
-            color: green;
-        }
-        .unavailable {
-            color: red;
-        }
-    </style>
-
-    <script>
-        function confirmDelete(productId) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                window.location.href = 'allproducts.php?action=delete&product_id=' + productId;
-                alert("The product deleted successfully");
-            }
-        }
-    </script>
+    <script src="../assets/javascript/allproducts.js"></script>
+    <link rel="stylesheet" href="../assets/style/allproducts.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-75">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="addproduct.php">Cafeteria</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="addproduct.html">Cafeteria</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="home.php">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="users.php">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="welcome(admin).php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="allproducts.php">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="allusers.php">Users</a></li>
                     <li class="nav-item"><a class="nav-link" href="checks.php">Checks</a></li>
-                    <li class="nav-item"><a class="nav-link" href="createorder.php">Manual Order</a></li>
+                    <li class="nav-item"><a class="btn btn-success" href="createorder(admin).php">create Order</a></li>
                 </ul>
             </div>
         </div>

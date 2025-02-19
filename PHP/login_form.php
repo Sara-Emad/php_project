@@ -1,19 +1,18 @@
 <?php
+
 session_start();
 require_once 'Database.php';
 
 $errors = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
 
     if (empty($email)) {
         $errors[] = "Email is required.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email format.";
     }
-
     if (empty($password)) {
         $errors[] = "Password is required.";
     }
@@ -31,8 +30,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user'] = $user;
-            header("Location: welcome.php");
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['name'] = $user['name']; 
+
+            if ($_SESSION['role'] === 'admin') {
+                header("Location: welcome(admin).php");
+            } else {
+                header("Location: welcome(customer).php");
+            }
             exit();
         } else {
             $errors[] = "Invalid email or password.";
@@ -40,6 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -111,43 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 
-        <script>
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    var email = document.getElementById('email').value.trim();
-    var password = document.getElementById('password').value.trim();
-    var isValid = true;
-
-    var errorMessages = document.querySelectorAll('.error-message');
-    errorMessages.forEach(function(error) {
-        error.remove();
-    });
-
-    if (email === '') {
-        showError('email', 'Email is required.');
-        isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showError('email', 'Invalid email format.');
-        isValid = false;
-    }
-
-    if (password === '') {
-        showError('password', 'Password is required.');
-        isValid = false;
-    }
-
-    if (!isValid) {
-        event.preventDefault();
-    }
-});
-
-function showError(fieldId, message) {
-    var field = document.getElementById(fieldId);
-    var error = document.createElement('div');
-    error.className = 'error-message text-danger mt-1';
-    error.innerText = message;
-    field.parentNode.appendChild(error);
-}
-</script>
+    <script src="../assets/javascript/login_form.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

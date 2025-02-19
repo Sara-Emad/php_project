@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require_once 'Database.php';
 
 $db = new Database();
@@ -117,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="mb-3">
                         <label class="form-label">Role</label>
                         <select class="form-select" name="role" required>
-                            <option value="user">User</option>
+                            <option value="user">customer</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
