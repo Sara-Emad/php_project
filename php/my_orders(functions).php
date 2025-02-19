@@ -47,7 +47,7 @@ function calculateTotalPrice($db, $orderId)
     return number_format($totalPrice, 2);
 }
 
-// Filter orders by date range
+
 if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
     $startDate = $_GET['start_date'];
     $endDate = $_GET['end_date'];
