@@ -19,22 +19,22 @@ class Database {
     }
 //?_____________________________________select_____________________________________________________________
 
-    // public function select($table, $condition = "", $params = []) {
-    //     try {
-    //         $sql = "SELECT * FROM $table";
-    //         if (!empty($condition)) {
-    //             $sql .= " WHERE $condition";
-    //         }
+    public function select($table, $condition = "", $params = []) {
+        try {
+            $sql = "SELECT * FROM $table";
+            if (!empty($condition)) {
+                $sql .= " WHERE $condition";
+            }
     
-    //         $stmt = $this->conn->prepare($sql);
-    //         $stmt->execute($params);
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute($params);
     
-    //         return $stmt->fetchAll();
-    //     } catch (PDOException $e) {
-    //         echo "Select failed: " . $e->getMessage();
-    //         return [];
-    //     }
-    // }
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            echo "Select failed: " . $e->getMessage();
+            return [];
+        }
+    }
 // public function select($table, $columns = "*", $condition = "", $params = []) {
 //     try {
 //         $sql = "SELECT $columns FROM $table";
@@ -54,51 +54,99 @@ class Database {
 
 
 
-    public function select($table) {
-        try {
-            $sql = "SELECT * FROM $table";
-            $stmt = $this->conn->query($sql);
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            throw new Exception("Select failed: " . $e->getMessage());
-        }
-    }
+    // public function select($table) {
+    //     try {
+    //         $sql = "SELECT * FROM $table";
+    //         $stmt = $this->conn->query($sql);
+    //         return $stmt->fetchAll();
+    //     } catch (PDOException $e) {
+    //         throw new Exception("Select failed: " . $e->getMessage());
+    //     }
+    // }
 
 
-    public function getOrders($startDate, $endDate, $userId = null) {
+    // public function getOrders($startDate, $endDate, $userId = null) {
+    //     try {
+    //         $sql = "SELECT 
+    //                     u.name,
+    //                     o.date,
+    //                     p.product_name as order_name,
+    //                     op.quantity,
+    //                     (op.quantity * p.product_price) as total_price
+    //                 FROM orders o
+    //                 JOIN users u ON o.user_id = u.user_id
+    //                 JOIN order_products op ON o.order_id = op.order_id
+    //                 JOIN products p ON op.product_id = p.product_id
+    //                 WHERE o.date BETWEEN :start_date AND :end_date";
+            
+    //         if ($userId) {
+    //             $sql .= " AND o.user_id = :user_id";
+    //         }
+            
+    //         $sql .= " ORDER BY o.date DESC";
+            
+    //         $stmt = $this->conn->prepare($sql);
+    //         // Using bindParam() instead of bindValue()
+    //         $stmt->bindParam(":start_date", $startDate);
+    //         $stmt->bindParam(":end_date", $endDate);
+            
+    //         if ($userId) {
+    //             $stmt->bindParam(":user_id", $userId);
+    //         }
+            
+    //         $stmt->execute();
+    //         return $stmt->fetchAll();
+    //     } catch (PDOException $e) {
+    //         echo "Failed to get orders: " . $e->getMessage();
+    //         return false;
+    //     }
+    // }
+
+
+
+    public function getOrders($startDate = null, $endDate = null, $userId = null) {
         try {
             $sql = "SELECT 
+                        o.order_id,
+                        o.status,
                         u.name,
                         o.date,
-                        p.product_name as order_name,
-                        op.quantity,
-                        (op.quantity * p.product_price) as total_price
+                        SUM(op.quantity * p.product_price) AS total_price
                     FROM orders o
                     JOIN users u ON o.user_id = u.user_id
                     JOIN order_products op ON o.order_id = op.order_id
-                    JOIN products p ON op.product_id = p.product_id
-                    WHERE o.date BETWEEN :start_date AND :end_date";
-            
-            if ($userId) {
-                $sql .= " AND o.user_id = :user_id";
+                    JOIN products p ON op.product_id = p.product_id";
+    
+            $conditions = [];
+            if ($startDate && $endDate) {
+                $conditions[] = "o.date BETWEEN :start_date AND :end_date";
             }
-            
+            if ($userId) {
+                $conditions[] = "o.user_id = :user_id";
+            }
+    
+            if (!empty($conditions)) {
+                $sql .= " WHERE " . implode(" AND ", $conditions);
+            }
+    
+            $sql .= " GROUP BY o.order_id"; // Add grouping
             $sql .= " ORDER BY o.date DESC";
-            
+    
             $stmt = $this->conn->prepare($sql);
-            // Using bindParam() instead of bindValue()
-            $stmt->bindParam(":start_date", $startDate);
-            $stmt->bindParam(":end_date", $endDate);
-            
+    
+            if ($startDate && $endDate) {
+                $stmt->bindParam(":start_date", $startDate);
+                $stmt->bindParam(":end_date", $endDate);
+            }
             if ($userId) {
                 $stmt->bindParam(":user_id", $userId);
             }
-            
+    
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            echo "Failed to get orders: " . $e->getMessage();
-            return false;
+            error_log("Failed to get orders: " . $e->getMessage());
+            return [];
         }
     }
 //?_____________________________________insert_____________________________________________________________

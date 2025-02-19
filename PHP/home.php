@@ -27,13 +27,10 @@
                         <a class="nav-link" href="#about">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="faq.php">FAQ</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="btn btn-primary" href="login_form.php">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary" href="adduser.php">Sign up</a>
+                        <a class="btn btn-primary mx-2" href="adduser.php">Sign up</a>
                     </li>
                 </ul>
             </div>
@@ -100,6 +97,53 @@
             </div>
         </div>
     </section>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <!-- Contact Information -->
+                <div class="col-md-4 mb-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-map-marker-alt me-2"></i>123 Cafe Street, Food City</li>
+                        <li class="my-2"><i class="fas fa-phone me-2"></i>+20 1223697400</li>
+                        <li><i class="fas fa-envelope me-2"></i>info@cafeteria.com</li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-md-4 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="home.php" class="text-white text-decoration-none">Home</a></li>
+                        <li class="my-2"><a href="#about" class="text-white text-decoration-none">About</a></li>
+                        <li><a href="login_form.php" class="text-white text-decoration-none">Login</a></li>
+                        <li class="my-2"><a href="adduser.php" class="text-white text-decoration-none">Sign Up</a></li>
+                    </ul>
+                </div>
+
+                <!-- Social Media -->
+                <div class="col-md-4 mb-4">
+                    <h5>Follow Us</h5>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/peter-mahfouz-8342bb166/" class="text-white"><i class="fab fa-linkedin fa-2x"></i></a>
+                        <a href="https://www.linkedin.com/in/mohamed-elshemy-aaa804184?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" class="text-white"><i class="fab fa-linkedin fa-2x"></i></a>
+                        <a href="https://www.linkedin.com/in/amro-h-farouq-44b8652a9/" class="text-white"><i class="fab fa-linkedin fa-2x"></i></a>
+                        <a href="https://www.linkedin.com/in/sara-3433a9287/?locale=ar_AE" class="text-white"><i class="fab fa-linkedin fa-2x"></i></a>
+                        <a href="https://www.linkedin.com/in/sherifabdelbast?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" class="text-white"><i class="fab fa-linkedin fa-2x"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="row pt-3 border-top">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2023 Cafeteria. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

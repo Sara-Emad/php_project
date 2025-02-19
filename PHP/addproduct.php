@@ -45,16 +45,16 @@ if (!empty($_SESSION['errors'])) {
               <a class="nav-link" href="home.php">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="products.php">Products</a>
+              <a class="nav-link" href="allproducts.php">Products</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="users.php">Users</a>
+              <a class="nav-link" href="allusers.php">Users</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="checks.php">Checks</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="createorder.php">Manual Order</a>
+              <a class="nav-link" href="createorder(admin).php">Create Order</a>
             </li>
           </ul>
         </div>

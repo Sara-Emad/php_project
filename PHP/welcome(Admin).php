@@ -35,25 +35,16 @@
                         <a class="nav-link" href="home.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="faq.php">FAQ</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="allusers.php">All Users</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">My orders</a>
+                        <a class="nav-link" href="orders.php">orders</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-success me-2" href="createorder.php">create Order</a>
+                        <a class="btn btn-success me-2" href="createorder(admin).php">Create Order</a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-primary" href="logout.php">Logout</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="index.php">Admin</a>
                     </li>
                 </ul>
             </div>

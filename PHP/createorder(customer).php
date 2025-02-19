@@ -35,16 +35,10 @@ if (!$products) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php">Home</a>
+                        <a class="nav-link" href="welcome(customer).php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="adduser.php">Add User</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="product_mangement.php">Products</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="orders.php">Orders</a>
+                        <a class="nav-link" href="my_orders.php">My order</a>
                     </li>
                 </ul>
             </div>

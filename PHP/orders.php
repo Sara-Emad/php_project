@@ -3,10 +3,7 @@ require "database.php";
 
 $db = new Database();
 
-$orders = $db->select(
-    "orders JOIN users ON orders.user_id = users.user_id", 
-    "orders.order_id, orders.status, orders.date, users.name"
-);
+$orders = $db->getOrders();
 
 // $users = $db->select('users');
 // $getOrders = $db-> getOrders();
@@ -34,9 +31,9 @@ $orders = $db->select(
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="home.php">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="allproducts.php">Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="users.php">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="allusers.php">Users</a></li>
                     <li class="nav-item"><a class="nav-link" href="checks.php">Checks</a></li>
-                    <li class="nav-item"><a class="nav-link" href="createorder.php">Manual Order</a></li>
+                    <li class="nav-item"><a class="btn btn-success" href="createorder(admin).php">create Order</a></li>
                 </ul>
             </div>
         </div>
@@ -56,12 +53,13 @@ $orders = $db->select(
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($orders as $order): ?>
+                <?php foreach ($orders as $order): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($order['order_id']); ?></td>
                             <td><?php echo htmlspecialchars($order['name']); ?></td>
                             <td><?php echo htmlspecialchars($order['date']); ?></td>
-                            <td class="status"><?php echo htmlspecialchars($order['status']); ?></td>
+                            <td><?php echo htmlspecialchars($order['status']); ?></td>
+                            <td><?php echo htmlspecialchars(number_format($order['total_price'], 2)); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
