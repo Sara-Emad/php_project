@@ -1,103 +1,73 @@
 <?php
 session_start();
-require_once '../php/database/config.php';
-require_once 'order.php';
+require_once 'database.php';
 
 header('Content-Type: application/json');
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', 'order_errors.log');
 
 try {
-    // Debug logging
-    error_log("POST data received: " . print_r($_POST, true));
-    
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception("Invalid request method");
+    // Decode the JSON input
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!$data || !isset($data['products']) || empty($data['products'])) {
+        throw new Exception('Invalid order data');
     }
 
-    $database = new Database();
-    $db = $database->getConnection();
-    
-    // // Hardcode user_id for testing
-    // $user_id = 1; // Replace with $_SESSION['user_id'] in production
-    // ====================================================================================
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode([
-        "status" => "error",
-        "message" => "User not authenticated"
-    ]);
-    exit;
-}
+    $db = new Database();
 
-// Use the actual logged-in user's ID
-$user_id = $_SESSION['user_id'];
-    // Debug products data
-    error_log("Products data: " . print_r($_POST['products'], true));
+    // Create the main order record
+    $orderInsertData = [
+        'user_id' => $_SESSION['user_id'] ?? 1, // Fallback to user 1 if not logged in
+        'date' => date('Y-m-d'),
+        'notes' => $data['notes'] ?? '',
+        'room' => $data['room'] ?? '',
+        'status' => 'Pending'
+    ];
 
-    if (empty($_POST['products'])) {
-        throw new Exception("No products provided in the order");
+    // Insert the order and get the order ID
+    $orderId = $db->insert('orders', $orderInsertData);
+
+    if (!$orderId) {
+        throw new Exception('Failed to create order');
     }
 
-    $order = new Order($db);
-    
-    // Set order properties
-    $order->user_id = $user_id;
-    $order->status = "Pending";
-    $order->date = date('Y-m-d H:i:s');
-    $order->notes = isset($_POST['notes']) ? $_POST['notes'] : '';
-    $order->room = isset($_POST['room']) ? $_POST['room'] : '';
-
-    // Start transaction
-    $db->beginTransaction();
-    
-    // Create order and get ID
-    $order_id = $order->create();
-    
-    if (!$order_id) {
-        throw new Exception("Order creation failed in database");
-    }
-
-    // Process each product
-    foreach ($_POST['products'] as $product) {
-        $product_id = (int)$product['product_id'];
-        $quantity = (int)$product['quantity'];
-        
-        if ($product_id <= 0 || $quantity <= 0) {
-            throw new Exception("Invalid product ID or quantity");
+    // Process each product in the order
+    foreach ($data['products'] as $product) {
+        if (!isset($product['product_id']) || !isset($product['quantity'])) {
+            throw new Exception('Invalid product data');
         }
+
+        $orderProductData = [
+            'order_id' => $orderId,
+            'product_id' => $product['product_id'],
+            'quantity' => $product['quantity']
+        ];
+
+        $result = $db->insert('order_products', $orderProductData);
         
-        if (!$order->addOrderProducts($order_id, $product_id, $quantity)) {
-            throw new Exception("Failed to add product {$product_id} to order");
+        if ($result === false) {
+            throw new Exception('Failed to add product to order');
         }
     }
 
-    // Commit transaction
-    $db->commit();
-    
     echo json_encode([
-        "status" => "success",
-        "message" => "Order created successfully",
-        "order_id" => $order_id
+        'status' => 'success',
+        'message' => 'Order created successfully',
+        'order_id' => $orderId
     ]);
 
 } catch (Exception $e) {
-    if (isset($db) && $db->inTransaction()) {
-        $db->rollBack();
+    // If there's an error and an order was created, attempt to delete it
+    if (isset($orderId) && isset($db)) {
+        try {
+            $db->delete('orders', $orderId);
+        } catch (Exception $deleteError) {
+            // Log the delete error but don't expose it to the user
+            error_log("Failed to delete failed order: " . $deleteError->getMessage());
+        }
     }
     
-    error_log("Order Error: " . $e->getMessage());
-    error_log("Stack trace: " . $e->getTraceAsString());
-    
     echo json_encode([
-        "status" => "error",
-        "message" => $e->getMessage(),
-        "debug" => [
-            "post_data" => $_POST,
-            "error" => $e->getMessage(),
-            "trace" => $e->getTraceAsString()
-        ]
+        'status' => 'error',
+        'message' => $e->getMessage()
     ]);
 }
