@@ -1,7 +1,12 @@
 <?php
+session_start();
 require_once 'database.php';
 
-session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login_form.php");
+    exit();
+}
+
 
 $db = new Database();
 
@@ -43,6 +48,9 @@ if (!$products) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="orders.php">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="checks.php">checks</a>
                     </li>
                 </ul>
             </div>

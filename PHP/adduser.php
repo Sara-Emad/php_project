@@ -69,9 +69,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <li class="nav-item">
                         <a class="nav-link" href="home.php">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="my_orders.php">My order</a>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -123,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <option value="admin">Admin</option>
                         </select>
                     </div>
-                    <a href="login_form.php">Have an account?</a>
+                    <a class="text-warning" href="login_form.php">Have an account?</a>
                     <br>
                     <br>
                     <div class="d-grid">

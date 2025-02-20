@@ -1,4 +1,10 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login_form.php");
+    exit();
+}
 require 'database.php'; // Include your database connection
 $db = new Database(); // Create a new instance of the Database class
 
@@ -36,7 +42,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['user_
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Cafe System</a>
+            <a class="navbar-brand" href="welcome(admin).php">Cafeteria</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -53,6 +59,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['user_
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="checks.php">checks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="orders.php">Orders</a>
                     </li>
                 </ul>
             </div>

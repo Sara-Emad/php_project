@@ -1,7 +1,13 @@
 <?php
+session_start();
+
 require_once 'database.php';
 
-session_start();
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
+    header("Location: login_form.php");
+    exit();
+}
 
 
 
@@ -27,7 +33,7 @@ if (!$products) {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Cafe System</a>
+            <a class="navbar-brand" href="welcome(customer).php">Cafeteria</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

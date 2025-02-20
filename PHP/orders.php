@@ -1,10 +1,14 @@
 <?php
+session_start();
 require "database.php";
 
 $db = new Database();
-
 $orders = $db->getOrders();
 
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login_form.php");
+    exit();
+}
 // $users = $db->select('users');
 // $getOrders = $db-> getOrders();
 

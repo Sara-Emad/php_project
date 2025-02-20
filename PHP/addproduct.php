@@ -1,9 +1,16 @@
 <?php
+session_start();
+
 require_once "database.php";
 $db = new Database(); 
 $categories = $db->select('categories');
 
-session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+  header("Location: login_form.php");
+  exit();
+}
+
+
 if (!empty($_SESSION['errors'])) {
     $errors = $_SESSION['errors'];
     unset($_SESSION['errors']);

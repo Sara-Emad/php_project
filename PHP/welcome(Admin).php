@@ -33,13 +33,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                         <a class="nav-link" href="home.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="allusers.php">All Users</a>
+                        <a class="nav-link" href="allusers.php">Users</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="orders.php">orders</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="checks.php">checks</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="btn btn-success me-2" href="createorder(admin).php">Create Order</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addproduct.php" class="btn btn-success me-2">Add New Product</a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-primary" href="logout.php">Logout</a>
@@ -51,7 +57,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
     <section class="hero">
         <div class="hero-content">
-            <h1 class="text-warning">Welcome to Admin</h1>
+            <h1 class="text-warning">Welcome Admin</h1>
         </div>
     </section>
 

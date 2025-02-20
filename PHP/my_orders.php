@@ -1,6 +1,11 @@
 <?php
 require_once('my_orders(functions).php');
 
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
+    header("Location: login_form.php");
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -18,7 +23,7 @@ require_once('my_orders(functions).php');
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-white">
         <div class="container">
-            <a class="navbar-brand" href="#"><strong>Cafe</strong></a>
+            <a class="navbar-brand" href="#"><strong>Cafeteria</strong></a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav">
                     <li class="nav-item">

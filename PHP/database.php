@@ -35,7 +35,6 @@ class Database {
             return [];
         }
     }
-
     public function getOrders($startDate = null, $endDate = null, $userId = null) {
         try {
             $sql = "SELECT 
@@ -43,7 +42,10 @@ class Database {
                         o.status,
                         u.name,
                         o.date,
-                        SUM(op.quantity * p.product_price) AS total_price
+                        p.product_name as order_name,
+                        op.quantity,
+                        p.product_price,
+                        (op.quantity * p.product_price) as total_price
                     FROM orders o
                     JOIN users u ON o.user_id = u.user_id
                     JOIN order_products op ON o.order_id = op.order_id
@@ -61,7 +63,6 @@ class Database {
                 $sql .= " WHERE " . implode(" AND ", $conditions);
             }
     
-            $sql .= " GROUP BY o.order_id"; // Add grouping
             $sql .= " ORDER BY o.date DESC";
     
             $stmt = $this->conn->prepare($sql);

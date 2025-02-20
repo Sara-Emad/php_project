@@ -6,6 +6,11 @@ require_once 'database.php';
 $db = new Database();
 
 $users = $db->select('users');
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login_form.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -37,6 +42,7 @@ $users = $db->select('users');
                     <li class="nav-item"><a class="nav-link" href="allproducts.php">Products</a></li>
                     <li class="nav-item"><a class="nav-link" href="allusers.php">Users</a></li>
                     <li class="nav-item"><a class="nav-link" href="checks.php">Checks</a></li>
+                    <li class="nav-item"><a class="nav-link" href="Orders.php">Orders</a></li>
                     <li class="nav-item"><a class="btn btn-success" href="createorder(admin).php">create Order</a></li>
                 </ul>
             </div>
